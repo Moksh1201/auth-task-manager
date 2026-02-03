@@ -8,8 +8,45 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  // For credentialed requests, the header must echo the Origin (not "*").
+  const origin = req.headers.origin;
+  if (origin) res.header("Access-Control-Allow-Origin", origin);
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  return next();
+});
 app.use(express.json());
+
+app.use((req, res, next) => {
+  if (
+    req.path.startsWith("/api/v1") &&
+    req.path !== "/api/v1/health" &&
+    mongoose.connection.readyState !== 1
+  ) {
+    return res.status(503).json({ message: "Database not connected" });
+  }
+  return next();
+});
 
 const swaggerSpec = {
   openapi: "3.0.0",
@@ -17,7 +54,7 @@ const swaggerSpec = {
     title: "Task Manager API",
     version: "1.0.0",
   },
-  servers: [{ url: "http://localhost:5000/api/v1" }],
+  servers: [{ url: `http://localhost:${process.env.PORT || 5000}/api/v1` }],
   components: {
     securitySchemes: {
       bearerAuth: {

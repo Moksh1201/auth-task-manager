@@ -70,6 +70,10 @@ export const deleteTask = async (req, res, next) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
+    if (req.user.role !== "ADMIN" && task.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not allowed to delete this task" });
+    }
+
     await task.deleteOne();
     res.status(200).json({ message: "Task deleted" });
   } catch (error) {

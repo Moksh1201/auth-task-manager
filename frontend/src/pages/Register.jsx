@@ -38,8 +38,10 @@ const Register = () => {
       setMessage(data.message || "Registration successful");
       navigate("/dashboard");
     } catch (err) {
-      const msg = err.response?.data?.message || "Registration failed";
-      setError(msg);
+      const payload = err.response?.data;
+      const msg = payload?.message || "Registration failed";
+      const details = Array.isArray(payload?.details) ? payload.details.join("\n") : "";
+      setError(details ? `${msg}\n${details}` : msg);
     } finally {
       setLoading(false);
     }
@@ -81,6 +83,9 @@ const Register = () => {
               required
             />
           </label>
+          <p className="muted">
+            Password must be at least 8 characters and include uppercase, lowercase, number, and special character.
+          </p>
           <label>
             Confirm Password
             <input

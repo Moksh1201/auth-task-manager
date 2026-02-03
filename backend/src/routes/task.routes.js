@@ -7,7 +7,6 @@ import {
   deleteTask,
 } from "../controllers/task.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
-import roleMiddleware from "../middlewares/role.middleware.js";
 import validate from "../middlewares/validate.middleware.js";
 
 const router = Router();
@@ -29,6 +28,6 @@ router.use(authMiddleware);
 router.get("/", getTasks);
 router.post("/", validate(createTaskSchema), createTask);
 router.put("/:id", validate(updateTaskSchema), updateTask);
-router.delete("/:id", roleMiddleware("ADMIN"), deleteTask);
+router.delete("/:id", deleteTask);
 
 export default router;
