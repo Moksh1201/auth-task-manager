@@ -18,7 +18,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
-  // For credentialed requests, the header must echo the Origin (not "*").
   const origin = req.headers.origin;
   if (origin) res.header("Access-Control-Allow-Origin", origin);
   res.header("Access-Control-Allow-Credentials", "true");
